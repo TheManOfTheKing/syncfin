@@ -63,7 +63,8 @@ export const contasBancarias = mysqlTable('contas_bancarias', {
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 }, (table) => ({
-  empresaIdx: index('empresaIdx').on(table.empresaId),
+  empresaIdx: index('idx_empresa').on(table.empresaId),
+  statusIdx: index('idx_status').on(table.status),
 }));
 
 /**
