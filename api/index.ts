@@ -1,6 +1,13 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+// Inicializar o banco de dados antes de importar as rotas
+import { getDb } from '../server/db/index.js';
+// Aguardar inicialização do banco (lazy, só quando necessário)
+getDb().catch((err) => {
+  console.error('⚠️ Erro ao inicializar banco (será tentado novamente na primeira requisição):', err.message);
+});
+
 import authRoutes from '../server/routes/auth.js';
 import empresasRoutes from '../server/routes/empresas.js';
 import categoriasRoutes from '../server/routes/categorias.js';

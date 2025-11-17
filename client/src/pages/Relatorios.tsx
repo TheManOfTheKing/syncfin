@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config/api';
 import Header from '../components/Header';
 
 export default function Relatorios() {
@@ -17,7 +18,7 @@ export default function Relatorios() {
   const carregarEmpresas = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/empresas', {
+      const response = await fetch(`${API_URL}/api/empresas', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {

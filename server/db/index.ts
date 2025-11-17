@@ -71,23 +71,12 @@ export async function getDb(): Promise<ReturnType<typeof drizzle>> {
   return dbPromise;
 }
 
-// Criar um proxy que intercepta todas as chamadas e inicializa o db automaticamente
-// Isso mantém compatibilidade com o código existente (db.select(), db.insert(), etc.)
-// O proxy retorna uma promise que resolve para o método real do db
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-  get: (_target, prop) => {
-    // Retornar uma função/propriedade que inicializa o db e então retorna o método/propriedade
-    const handler = async (...args: any[]) => {
-      const instance = await getDb();
-      const method = (instance as any)[prop];
-      if (typeof method === 'function') {
-        return method.apply(instance, args);
-      }
-      return method;
-    };
-    
-    // Se for uma propriedade (não função), retornar a promise resolvida
-    // Se for uma função, retornar a função wrapper
-    return handler;
-  }
-}) as any;
+// Exportar db como getDb para uso direto
+// Todos os arquivos devem usar: const db = await getDb(); antes de usar
+export { getDb };
+
+// Para compatibilidade temporária, exportar db como uma promise
+// que resolve para o db real (mas isso requer await em cada uso)
+// ATENÇÃO: Isso não funciona com métodos encadeados como db.select().from()
+// Os arquivos precisam ser atualizados para usar: const db = await getDb();
+export const db = getDb() as any;

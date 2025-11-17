@@ -1,0 +1,15 @@
+# Configuração Nixpacks para Railway
+# Railway usa Nixpacks para detectar e buildar o projeto
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build:server"]
+
+[start]
+cmd = "npm start"
+

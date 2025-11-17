@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config/api';
 import DashboardHeader from '../components/DashboardHeader';
 import Footer from '../components/Footer';
 
@@ -24,7 +25,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
   const carregarKPIs = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/dashboard/kpis', {
+      const response = await fetch(`${API_URL}/api/dashboard/kpis`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

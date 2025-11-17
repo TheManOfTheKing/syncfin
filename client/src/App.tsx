@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { API_URL } from './config/api';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Empresas from './pages/Empresas';
@@ -18,7 +19,7 @@ function App() {
     const token = localStorage.getItem('token');
     if (token) {
       // Verificar se token é válido
-      fetch('/api/auth/me', {
+      fetch(`${API_URL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
