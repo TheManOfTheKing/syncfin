@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { contasBancarias, usuarioEmpresas } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -108,7 +108,8 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Acesso negado a esta empresa' });
     }
 
-    const [novaConta] = await db.insert(contasBancarias).values({
+    const dbInstance = await getDb();
+    const [novaConta] = await dbInstance.insert(contasBancarias).values({
       empresaId,
       nome,
       bancoCodigo,
