@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { transacoes, usuarioEmpresas } from '../db/schema.js';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -66,8 +66,8 @@ router.post('/detectar', async (req: AuthRequest, res) => {
           // Gerar grupo de transferência (usar o menor ID)
           const grupoId = Math.min(saida.id, entrada.id);
 
-          await db
-            .update(transacoes)
+          const dbInstance2 = await getDb();
+          await dbInstance2.update(transacoes)
             .set({
               status: 'transferencia_interna',
               grupoTransferenciaId: grupoId,
@@ -80,8 +80,8 @@ router.post('/detectar', async (req: AuthRequest, res) => {
               )
             );
 
-          await db
-            .update(transacoes)
+          const dbInstance2 = await getDb();
+          await dbInstance2.update(transacoes)
             .set({
               status: 'transferencia_interna',
               grupoTransferenciaId: grupoId,

@@ -1,0 +1,28 @@
+# Backend (não precisa na Vercel)
+server/
+api/
+dist/server/
+
+# Banco de dados
+drizzle/
+*.sql
+
+# Scripts
+scripts/
+
+# Arquivos de configuração do backend
+railway.json
+.nixpacks.toml
+tsconfig.server.json
+
+# Node modules e cache
+node_modules/
+.pnpm-store/
+
+# Ambiente
+.env
+.env.local
+
+# Documentação
+*.md
+!README.md

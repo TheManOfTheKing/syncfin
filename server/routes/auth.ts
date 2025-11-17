@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { hashPassword, comparePassword, generateToken } from '../utils/auth.js';
 import { eq } from 'drizzle-orm';
@@ -10,7 +10,8 @@ const router = Router();
 router.get('/diagnostico', async (_req, res) => {
   try {
     // Testar conexão
-    await db.select().from(users).limit(1);
+    const dbInstance = await getDb();
+    await dbInstance.select().from(users).limit(1);
     
     res.json({
       status: 'ok',
@@ -40,7 +41,8 @@ router.post('/register', async (req, res) => {
     }
 
     // Verificar se usuário já existe
-    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const dbInstance1 = await getDb();
+    const existingUser = await dbInstance1.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (existingUser.length > 0) {
       return res.status(400).json({ error: 'Email já cadastrado' });
@@ -50,7 +52,8 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     // Criar usuário
-    const [newUser] = await db.insert(users).values({
+    const dbInstance2 = await getDb();
+    const [newUser] = await dbInstance2.insert(users).values({
       email,
       password: hashedPassword,
       name,
@@ -85,7 +88,8 @@ router.post('/login', async (req, res) => {
     }
 
     // Buscar usuário
-    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const dbInstance = await getDb();
+    const [user] = await dbInstance.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (!user) {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
@@ -164,7 +168,8 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'Token inválido' });
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, decoded.userId)).limit(1);
+    const dbInstance = await getDb();
+    const [user] = await dbInstance.select().from(users).where(eq(users.id, decoded.userId)).limit(1);
 
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });

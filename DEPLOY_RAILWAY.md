@@ -65,7 +65,7 @@ Isso está configurado no `package.json`:
     "start": "cross-env NODE_ENV=production node dist/server/index.js"
   }
 }
-```
+```mysql://root:efEAlrmvZVAFwPbIbrYOPKQVpnqMfxMT@mysql.railway.internal:3306/railway
 
 ### 4. Conectar ao Banco de Dados
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { categorias, usuarioEmpresas } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -12,6 +12,7 @@ router.use(authMiddleware);
 // Listar categorias de uma empresa
 router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
 
@@ -51,6 +52,7 @@ router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
 // Buscar categoria por ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const categoriaId = parseInt(req.params.id);
 
@@ -90,6 +92,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Criar nova categoria
 router.post('/', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, nome, tipo, codigo, descricao } = req.body;
 
@@ -142,6 +145,7 @@ router.post('/', async (req: AuthRequest, res) => {
 // Atualizar categoria
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const categoriaId = parseInt(req.params.id);
     const { nome, tipo, codigo, descricao, ativo } = req.body;
@@ -201,6 +205,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 // Deletar categoria (soft delete)
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const categoriaId = parseInt(req.params.id);
 

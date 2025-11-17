@@ -7,11 +7,11 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cross-env NODE_ENV=development tsx watch server/index.ts",
     "dev:client": "vite",
-    "build": "npm run build:client",
     "build:client": "vite build",
     "build:server": "tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
-    "vercel-build": "npm run build",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "create-test-user": "tsx scripts/create-test-user.ts",
     "create-user-andre": "tsx scripts/create-user-andre.ts"

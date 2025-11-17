@@ -12,6 +12,7 @@ router.use(authMiddleware);
 // Listar contas bancárias de uma empresa
 router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
 
@@ -46,6 +47,7 @@ router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
 // Buscar conta por ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const contaId = parseInt(req.params.id);
 
@@ -85,6 +87,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Criar nova conta bancária
 router.post('/', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, nome, bancoCodigo, agencia, conta: numeroConta, identificadorUnico } = req.body;
 
@@ -108,8 +111,7 @@ router.post('/', async (req: AuthRequest, res) => {
       return res.status(403).json({ error: 'Acesso negado a esta empresa' });
     }
 
-    const dbInstance = await getDb();
-    const [novaConta] = await dbInstance.insert(contasBancarias).values({
+    const [novaConta] = await db.insert(contasBancarias).values({
       empresaId,
       nome,
       bancoCodigo,
@@ -135,6 +137,7 @@ router.post('/', async (req: AuthRequest, res) => {
 // Atualizar conta bancária
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const contaId = parseInt(req.params.id);
     const { nome, bancoCodigo, agencia, conta: numeroConta, identificadorUnico, status } = req.body;
@@ -195,6 +198,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 // Deletar conta bancária (soft delete)
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const contaId = parseInt(req.params.id);
 

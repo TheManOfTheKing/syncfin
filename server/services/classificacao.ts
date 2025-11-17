@@ -1,4 +1,4 @@
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { historicoAprendizado, categorias, transacoes } from '../db/schema.js';
 
@@ -171,7 +171,8 @@ export async function registrarAprendizado(
   usuarioId: number
 ): Promise<void> {
   try {
-    await db.insert(historicoAprendizado).values({
+    const dbInstance = await getDb();
+    await dbInstance.insert(historicoAprendizado).values({
       empresaId,
       descricaoOriginal,
       descricaoLimpa,

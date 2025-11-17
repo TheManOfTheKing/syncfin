@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { transacoes, usuarioEmpresas, categorias, empresas } from '../db/schema.js';
 import { eq, and, or, gte, lte, desc } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';

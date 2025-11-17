@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
+// Helper para facilitar uso do db
+async function getDbInstance() {
+  return await getDb();
+}
 import { empresas, usuarioEmpresas } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -97,7 +101,8 @@ router.post('/', async (req: AuthRequest, res) => {
     }
 
     // Criar empresa
-    const [novaEmpresa] = await db.insert(empresas).values({
+    const dbInstance = await getDb();
+    const [novaEmpresa] = await dbInstance.insert(empresas).values({
       nome,
       documento,
       slug: slug || nome.toLowerCase().replace(/\s+/g, '-'),
@@ -105,7 +110,8 @@ router.post('/', async (req: AuthRequest, res) => {
     } as any);
 
     // Associar usuário à empresa como admin
-    await db.insert(usuarioEmpresas).values({
+    const dbInstance2 = await getDb();
+    await dbInstance2.insert(usuarioEmpresas).values({
       usuarioId: userId,
       empresaId: novaEmpresa.insertId,
       perfil: 'admin',

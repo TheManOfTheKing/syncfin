@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { transacoes, usuarioEmpresas, mapeamentosImportacao } from '../db/schema.js';
 import { eq, and, desc } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -224,7 +224,8 @@ router.post('/confirmar', async (req: AuthRequest, res) => {
         );
 
         // Inserir transação
-        await db.insert(transacoes).values({
+        const dbInstance = await getDb();
+        await dbInstance.insert(transacoes).values({
           empresaId: parseInt(empresaId),
           contaId: contaId ? parseInt(contaId) : null,
           dataOperacao: transacao.data,
@@ -256,7 +257,8 @@ router.post('/confirmar', async (req: AuthRequest, res) => {
     // Salvar mapeamento se fornecido
     if (bancoCodigo) {
       try {
-        await db.insert(mapeamentosImportacao).values({
+        const dbInstance2 = await getDb();
+        await dbInstance2.insert(mapeamentosImportacao).values({
           empresaId: parseInt(empresaId),
           bancoCodigo,
           extensao,

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db/index.js';
+import { getDb } from '../db/index.js';
 import { transacoes, usuarioEmpresas, empresas, categorias } from '../db/schema.js';
 import { eq, and, or } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -13,6 +13,7 @@ router.use(authMiddleware);
 router.get('/kpis', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
+    const db = await getDb();
 
     // Buscar todas as empresas do usuário
     const empresasUsuario = await db
