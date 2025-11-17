@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from '../server/routes/auth.js';
@@ -10,14 +10,15 @@ import importacaoRoutes from '../server/routes/importacao.js';
 import transferenciasRoutes from '../server/routes/transferencias.js';
 import dashboardRoutes from '../server/routes/dashboard.js';
 import relatoriosRoutes from '../server/routes/relatorios.js';
+
 const app = express();
 
 // Middlewares
 app.use(cors({
-  origin: process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}` 
-    : process.env.FRONTEND_URL || '*',
+  origin: '*', // Permitir todas as origens na Vercel
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -35,12 +36,12 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/relatorios', relatoriosRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Middleware de tratamento de erros
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('❌ Erro no servidor:', err);
   res.status(500).json({ 
     error: 'Erro interno do servidor',
