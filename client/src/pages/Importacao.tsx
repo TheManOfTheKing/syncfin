@@ -71,7 +71,7 @@ export default function Importacao() {
       formData.append('empresaId', empresaId);
       if (contaId) formData.append('contaId', contaId);
 
-      const response = await fetch(`${API_URL}/api/importacao/upload', {
+      const response = await fetch(`${API_URL}/api/importacao/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -129,7 +129,7 @@ export default function Importacao() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/importacao/confirmar', {
+      const response = await fetch(`${API_URL}/api/importacao/confirmar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

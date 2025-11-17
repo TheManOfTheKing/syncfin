@@ -37,7 +37,7 @@ export default function Transacoes() {
   const carregarEmpresas = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/empresas', {
+      const response = await fetch(`${API_URL}/api/empresas`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
