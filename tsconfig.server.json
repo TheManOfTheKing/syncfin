@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmit": false,
-    "outDir": "./dist/server",
+    "outDir": "./dist",
     "rootDir": ".",
     "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
@@ -14,6 +14,6 @@
     "noUnusedParameters": false,
     "strict": false
   },
-  "include": ["server/**/*", "shared/**/*", "api/**/*"],
+  "include": ["server/**/*", "shared/**/*"],
   "exclude": ["node_modules", "dist", "client"]
 }
