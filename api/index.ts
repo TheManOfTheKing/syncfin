@@ -61,5 +61,6 @@ app.use((err: unknown, _req: Request, res: express.Response, _next: NextFunction
 });
 
 // Exportar como serverless function para Vercel
-// A Vercel automaticamente detecta e usa o app Express
+// A Vercel suporta Express diretamente quando exportado como default
+// O vercel.json está configurado para rotear /api/* para este arquivo
 export default app;

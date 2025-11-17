@@ -16,29 +16,29 @@ if (!process.env.DATABASE_URL) {
 
 console.log('🔗 Conectando ao banco...');
 
-let connection: mysql.Connection;
+let pool: mysql.Pool;
 let db: ReturnType<typeof drizzle>;
 
 try {
-  connection = await mysql.createConnection({
+  // Usar createPool para melhor performance e compatibilidade com Vercel
+  pool = mysql.createPool({
     uri: process.env.DATABASE_URL,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: process.env.DATABASE_URL?.includes('railway') ? {
+      rejectUnauthorized: false
+    } : undefined
   });
 
   // Testar conexão
-  await connection.ping();
+  const testConnection = await pool.getConnection();
+  await testConnection.ping();
+  testConnection.release();
   
   console.log('✅ Banco conectado com sucesso!');
   
-  db = drizzle(connection, { schema, mode: 'default' });
-  
-  // Tratamento de erros de conexão perdida
-  connection.on('error', (err: any) => {
-    if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNREFUSED') {
-      console.error('⚠️ Conexão com banco perdida. Reinicie o servidor.');
-    } else {
-      console.error('⚠️ Erro na conexão:', err.message);
-    }
-  });
+  db = drizzle(pool, { schema, mode: 'default' });
   
 } catch (error: any) {
   console.error('❌ Erro ao conectar ao banco de dados:');
