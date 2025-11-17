@@ -13,7 +13,8 @@
     "vercel-build": "npm run build",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "create-test-user": "tsx scripts/create-test-user.ts"
+    "create-test-user": "tsx scripts/create-test-user.ts",
+    "create-user-andre": "tsx scripts/create-user-andre.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.56.2",
