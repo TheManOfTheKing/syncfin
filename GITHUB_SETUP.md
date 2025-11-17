@@ -21,7 +21,7 @@ Este erro geralmente ocorre quando o Git não está autenticado. Para repositór
 
 Quando fizer push, o Git vai pedir credenciais:
 
-**Username:** `salesadvarquivo`  
+**Username:** `TheManOfTheKing`  
 **Password:** `SEU_TOKEN_AQUI` (cole o token, não sua senha!)
 
 ---
@@ -37,7 +37,7 @@ git config --global credential.helper manager-core
 ```
 
 Depois, quando fizer push, digite:
-- Username: `salesadvarquivo`
+- Username: `TheManOfTheKing`
 - Password: `SEU_TOKEN`
 
 O Windows vai salvar as credenciais.
@@ -45,7 +45,7 @@ O Windows vai salvar as credenciais.
 ### Ou usar URL com Token (menos seguro)
 
 ```bash
-git remote set-url origin https://SEU_TOKEN@github.com/salesadvarquivo/syncfin.git
+git remote set-url origin https://SEU_TOKEN@github.com/TheManOfTheKing/syncfin.git
 ```
 
 ⚠️ **Não commite este token!**
@@ -59,7 +59,7 @@ git push -u origin main
 ```
 
 Se pedir credenciais:
-- Username: `salesadvarquivo`
+- Username: `TheManOfTheKing`
 - Password: `seu_token_aqui`
 
 ---

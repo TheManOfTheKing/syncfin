@@ -20,7 +20,7 @@ A Vercel **NÃO usa token na URL** como o GitHub. Ela se conecta ao GitHub via *
 1. No dashboard da Vercel, clique em **"Add New..."**
 2. Selecione **"Project"**
 3. Você verá uma lista dos seus repositórios do GitHub
-4. Procure por **`syncfin`** (ou `salesadvarquivo/syncfin`)
+4. Procure por **`syncfin`** (ou `TheManOfTheKing/syncfin`)
 5. Clique em **"Import"**
 
 ### Passo 3: Configurar Projeto
