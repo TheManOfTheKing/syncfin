@@ -15,11 +15,19 @@ import relatoriosRoutes from './routes/relatorios.js';
 // Carregar variáveis de ambiente
 dotenv.config();
 
+console.log('🔄 Iniciando servidor...');
+console.log('📋 Variáveis de ambiente:');
+console.log(`   - NODE_ENV: ${process.env.NODE_ENV || 'não definido'}`);
+console.log(`   - PORT: ${process.env.PORT || 'não definido (usando 3000)'}`);
+console.log(`   - DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Configurado' : '❌ Não configurado'}`);
+console.log(`   - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Configurado' : '⚠️ Não configurado'}`);
+console.log(`   - FRONTEND_URL: ${process.env.FRONTEND_URL || 'não definido (usando http://localhost:5173)'}`);
+
 // Verificar variáveis de ambiente essenciais
 if (!process.env.DATABASE_URL) {
-  console.error('❌ ERRO: DATABASE_URL não encontrada!');
+  console.error('❌ ERRO CRÍTICO: DATABASE_URL não encontrada!');
   console.error('📝 Configure a variável DATABASE_URL no Railway.');
-  process.exit(1);
+  console.error('⚠️ O servidor será iniciado, mas as rotas de API não funcionarão.');
 }
 
 if (!process.env.JWT_SECRET) {
@@ -27,14 +35,13 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 console.log('🔧 Configuração do servidor:');
 console.log(`   - Ambiente: ${process.env.NODE_ENV || 'development'}`);
 console.log(`   - Porta: ${PORT}`);
 console.log(`   - Frontend permitido: ${FRONTEND_URL}`);
-console.log(`   - Banco de dados: ${process.env.DATABASE_URL ? '✅ Configurado' : '❌ Não configurado'}`);
 
 // Middlewares
 app.use(cors({
@@ -58,12 +65,30 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Health check (importante para Railway)
+// Este endpoint DEVE responder mesmo se o banco estiver offline
 app.get('/health', (_req, res) => {
-  res.json({ 
-    status: 'ok', 
+  const health = {
+    status: 'ok',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    database: !!process.env.DATABASE_URL
+    port: PORT,
+    database: !!process.env.DATABASE_URL,
+    uptime: process.uptime(),
+  };
+  
+  console.log('✅ Healthcheck acessado:', health);
+  res.status(200).json(health);
+});
+
+// Rota raiz para debug
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'API de Conciliação Bancária',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api/*'
+    }
   });
 });
 
@@ -102,24 +127,55 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('🚀 ========================================');
-  console.log(`   Servidor rodando na porta ${PORT}`);
-  console.log(`   Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   API: http://localhost:${PORT}/api`);
-  console.log(`   Health: http://localhost:${PORT}/health`);
+  console.log(`   ✅ Servidor rodando na porta ${PORT}`);
+  console.log(`   📍 Escutando em 0.0.0.0:${PORT}`);
+  console.log(`   🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   🔗 API: http://localhost:${PORT}/api`);
+  console.log(`   ❤️ Health: http://localhost:${PORT}/health`);
   console.log('🚀 ========================================');
   console.log('');
+  console.log('✅ Servidor pronto para receber requisições!');
+});
+
+// Timeout para garantir que o servidor está escutando
+server.on('listening', () => {
+  console.log('✅ Servidor está escutando na porta', PORT);
+});
+
+server.on('error', (error: any) => {
+  console.error('❌ Erro ao iniciar servidor:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Porta ${PORT} já está em uso!`);
+  }
+  process.exit(1);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('⚠️ SIGTERM recebido, encerrando servidor...');
-  process.exit(0);
+  server.close(() => {
+    console.log('✅ Servidor encerrado com sucesso');
+    process.exit(0);
+  });
 });
 
 process.on('SIGINT', () => {
   console.log('⚠️ SIGINT recebido, encerrando servidor...');
-  process.exit(0);
+  server.close(() => {
+    console.log('✅ Servidor encerrado com sucesso');
+    process.exit(0);
+  });
+});
+
+// Capturar erros não tratados
+process.on('uncaughtException', (error) => {
+  console.error('❌ Exceção não capturada:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Promise rejeitada não tratada:', promise, 'razão:', reason);
 });
