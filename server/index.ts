@@ -52,13 +52,13 @@ if (process.env.NODE_ENV === 'production') {
   const publicPath = path.join(__dirname, '../../public');
   app.use(express.static(publicPath));
   
-  app.get('*', (req, res) => {
+  app.get('*', (_req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
   });
 }
 
 // Middleware de tratamento de erros
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('❌ Erro no servidor:', err);
   res.status(500).json({ 
     error: 'Erro interno do servidor',

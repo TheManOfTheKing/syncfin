@@ -8,7 +8,7 @@ const router = Router();
 
 // Endpoint de diagnóstico (apenas em desenvolvimento)
 if (process.env.NODE_ENV === 'development') {
-  router.get('/diagnostico', async (req, res) => {
+  router.get('/diagnostico', async (_req, res) => {
     try {
       // Testar conexão
       await db.select().from(users).limit(1);

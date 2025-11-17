@@ -55,7 +55,7 @@ function identificarBanco(colunas: string[]): string | null {
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback): void => {
     const allowedMimes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     if (allowedMimes.includes(file.mimetype) || file.originalname.endsWith('.csv') || file.originalname.endsWith('.xlsx')) {
       cb(null, true);
@@ -72,7 +72,7 @@ router.use(authMiddleware);
 router.post('/upload', upload.single('arquivo'), async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.userId;
-    const { empresaId, contaId } = req.body;
+    const { empresaId } = req.body;
 
     if (!empresaId || !req.file) {
       return res.status(400).json({ error: 'Empresa e arquivo são obrigatórios' });

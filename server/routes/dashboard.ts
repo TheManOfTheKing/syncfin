@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { transacoes, usuarioEmpresas, empresas, categorias } from '../db/schema.js';
-import { eq, and, or, inArray } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();

@@ -6,8 +6,13 @@
     "noEmit": false,
     "outDir": "./dist/server",
     "rootDir": ".",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
-  "include": ["server/**/*", "shared/**/*"],
+  "include": ["server/**/*", "shared/**/*", "api/**/*"],
   "exclude": ["node_modules", "dist", "client"]
 }
