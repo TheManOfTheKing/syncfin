@@ -45,10 +45,18 @@ app.get('/health', (_req: Request, res: Response): void => {
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
   console.error('❌ Erro no servidor:', err);
   if (!res.headersSent) {
-    const error = err as { message?: string };
-    res.status(500).json({ 
+    const error = err as { message?: string; code?: string; stack?: string };
+    console.error('Erro completo:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
+    const response = res as Response & { status: (code: number) => Response };
+    response.status(500).json({ 
       error: 'Erro interno do servidor',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: error.message || 'Erro desconhecido',
+      code: error.code,
+      database_configured: !!process.env.DATABASE_URL
     });
   }
 });
