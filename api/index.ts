@@ -42,7 +42,7 @@ app.get('/health', (_req: Request, res: Response): void => {
 
 // Middleware de tratamento de erros
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
+app.use((err: unknown, _req: Request, res: express.Response, _next: NextFunction): void => {
   console.error('❌ Erro no servidor:', err);
   if (!res.headersSent) {
     const error = err as { message?: string; code?: string; stack?: string };
@@ -51,8 +51,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void 
       code: error.code,
       stack: error.stack
     });
-    const response = res as Response & { status: (code: number) => Response };
-    response.status(500).json({ 
+    res.status(500).json({ 
       error: 'Erro interno do servidor',
       message: error.message || 'Erro desconhecido',
       code: error.code,
