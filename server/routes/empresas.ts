@@ -1,9 +1,5 @@
 import { Router } from 'express';
 import { getDb } from '../db/index.js';
-// Helper para facilitar uso do db
-async function getDbInstance() {
-  return await getDb();
-}
 import { empresas, usuarioEmpresas } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
@@ -16,6 +12,7 @@ router.use(authMiddleware);
 // Listar empresas do usuário
 router.get('/', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
 
     // Buscar empresas associadas ao usuário
@@ -43,6 +40,7 @@ router.get('/', async (req: AuthRequest, res) => {
 // Buscar empresa por ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.id);
 
@@ -82,6 +80,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Criar nova empresa
 router.post('/', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { nome, documento, slug } = req.body;
 
@@ -101,8 +100,7 @@ router.post('/', async (req: AuthRequest, res) => {
     }
 
     // Criar empresa
-    const dbInstance = await getDb();
-    const [novaEmpresa] = await dbInstance.insert(empresas).values({
+    const [novaEmpresa] = await db.insert(empresas).values({
       nome,
       documento,
       slug: slug || nome.toLowerCase().replace(/\s+/g, '-'),
@@ -110,8 +108,7 @@ router.post('/', async (req: AuthRequest, res) => {
     } as any);
 
     // Associar usuário à empresa como admin
-    const dbInstance2 = await getDb();
-    await dbInstance2.insert(usuarioEmpresas).values({
+    await db.insert(usuarioEmpresas).values({
       usuarioId: userId,
       empresaId: novaEmpresa.insertId,
       perfil: 'admin',
@@ -133,6 +130,7 @@ router.post('/', async (req: AuthRequest, res) => {
 // Atualizar empresa
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.id);
     const { nome, documento, slug, status } = req.body;
@@ -196,6 +194,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
 // Deletar empresa (soft delete - apenas inativar)
 router.delete('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.id);
 
@@ -230,4 +229,3 @@ router.delete('/:id', async (req: AuthRequest, res) => {
 });
 
 export default router;
-

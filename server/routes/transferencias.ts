@@ -13,6 +13,7 @@ router.use(authMiddleware);
 // Detectar transferências internas
 router.post('/detectar', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, dataInicio, dataFim } = req.body;
 
@@ -113,6 +114,7 @@ router.post('/detectar', async (req: AuthRequest, res) => {
 // Listar transferências de uma empresa
 router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
 
@@ -163,4 +165,3 @@ router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
 });
 
 export default router;
-

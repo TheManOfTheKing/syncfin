@@ -14,6 +14,7 @@ router.use(authMiddleware);
 // Listar transações de uma empresa
 router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
     const { status, tipo, dataInicio, dataFim, limit = '100', offset = '0' } = req.query;
@@ -100,6 +101,7 @@ router.get('/empresa/:empresaId', async (req: AuthRequest, res) => {
 // Buscar transação por ID
 router.get('/:id', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const transacaoId = parseInt(req.params.id);
 
@@ -150,6 +152,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
 // Classificar transação manualmente
 router.put('/:id/classificar', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const transacaoId = parseInt(req.params.id);
     const { categoriaId } = req.body;
@@ -236,6 +239,7 @@ router.put('/:id/classificar', async (req: AuthRequest, res) => {
 // Estatísticas de transações
 router.get('/empresa/:empresaId/estatisticas', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
 
@@ -295,4 +299,3 @@ router.get('/empresa/:empresaId/estatisticas', async (req: AuthRequest, res) => 
 });
 
 export default router;
-

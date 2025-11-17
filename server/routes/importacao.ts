@@ -71,6 +71,7 @@ router.use(authMiddleware);
 // Upload e processamento inicial do arquivo
 router.post('/upload', upload.single('arquivo'), async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId } = req.body;
 
@@ -157,6 +158,7 @@ router.post('/upload', upload.single('arquivo'), async (req: AuthRequest, res) =
 // Confirmar importação com mapeamento
 router.post('/confirmar', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, contaId, mapeamento, dados, extensao, bancoCodigo } = req.body;
 
@@ -287,6 +289,7 @@ router.post('/confirmar', async (req: AuthRequest, res) => {
 // Listar mapeamentos salvos
 router.get('/mapeamentos/empresa/:empresaId', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const empresaId = parseInt(req.params.empresaId);
 
@@ -332,4 +335,3 @@ router.get('/mapeamentos/empresa/:empresaId', async (req: AuthRequest, res) => {
 });
 
 export default router;
-

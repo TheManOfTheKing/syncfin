@@ -13,6 +13,7 @@ router.use(authMiddleware);
 // Relatório consolidado DRE/Fluxo (soma por categoria em período)
 router.get('/dre-fluxo', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, dataInicio, dataFim, formato = 'json' } = req.query;
 
@@ -143,6 +144,7 @@ router.get('/dre-fluxo', async (req: AuthRequest, res) => {
 // Exportação detalhada (todas as transações)
 router.get('/exportacao-detalhada', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, dataInicio, dataFim } = req.query;
 
@@ -239,6 +241,7 @@ router.get('/exportacao-detalhada', async (req: AuthRequest, res) => {
 // Relatório de divergências
 router.get('/divergencias', async (req: AuthRequest, res) => {
   try {
+    const db = await getDb();
     const userId = req.user!.userId;
     const { empresaId, dataInicio, dataFim, formato = 'json' } = req.query;
 
@@ -330,4 +333,3 @@ router.get('/divergencias', async (req: AuthRequest, res) => {
 });
 
 export default router;
-
