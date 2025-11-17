@@ -208,7 +208,7 @@ router.put('/:id/classificar', async (req: AuthRequest, res) => {
         categoriaId,
         status: 'classificacao_manual',
         updatedAt: new Date(),
-      })
+      } as any)
       .where(eq(transacoes.id, transacaoId));
 
     // Registrar aprendizado

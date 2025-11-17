@@ -116,7 +116,7 @@ router.post('/', async (req: AuthRequest, res) => {
       conta: numeroConta,
       identificadorUnico,
       status: 'ativa',
-    });
+    } as any);
 
     const [contaCriada] = await db
       .select()
@@ -226,7 +226,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     // Inativar conta
     await db
       .update(contasBancarias)
-      .set({ status: 'inativa', updatedAt: new Date() })
+      .set({ status: 'inativa', updatedAt: new Date() } as any)
       .where(eq(contasBancarias.id, contaId));
 
     res.json({ message: 'Conta bancária inativada com sucesso' });

@@ -8,6 +8,13 @@
       "when": 1763358513143,
       "tag": "0000_supreme_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763390737449,
+      "tag": "0001_normal_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }

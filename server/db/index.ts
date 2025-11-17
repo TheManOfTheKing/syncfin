@@ -7,10 +7,11 @@ import * as schema from './schema.js';
 dotenv.config();
 
 if (!process.env.DATABASE_URL) {
-  console.error('❌ DATABASE_URL não encontrada no arquivo .env!');
-  console.error('📝 Crie um arquivo .env na raiz do projeto com:');
-  console.error('   DATABASE_URL=mysql://root@localhost:3306/conciliacao_bancaria');
-  process.exit(1);
+  console.error('❌ DATABASE_URL não encontrada!');
+  console.error('📝 Configure a variável DATABASE_URL no ambiente (Vercel ou .env)');
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 }
 
 console.log('🔗 Conectando ao banco...');

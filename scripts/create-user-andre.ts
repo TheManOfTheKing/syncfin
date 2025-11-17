@@ -63,7 +63,7 @@ async function createUserAndre() {
       email,
       password: hashedPassword,
       name,
-      role: 'user',
+      role: 'admin',
       ativo: true,
     });
 

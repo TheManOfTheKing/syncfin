@@ -241,7 +241,7 @@ router.post('/confirmar', async (req: AuthRequest, res) => {
               : 'baixa_confianca'
             : 'pendente',
           origem: 'importacao',
-        });
+        } as any);
 
         importadas++;
         if (classificacao.categoriaId) {
@@ -262,7 +262,7 @@ router.post('/confirmar', async (req: AuthRequest, res) => {
           extensao,
           mapaJson: JSON.stringify(mapeamento),
           ativo: true,
-        });
+        } as any);
       } catch (error) {
         console.error('Erro ao salvar mapeamento:', error);
       }

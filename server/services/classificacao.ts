@@ -178,7 +178,7 @@ export async function registrarAprendizado(
       categoriaId,
       confidence: 100, // Classificação manual tem 100% de confiança
       usuarioId,
-    });
+    } as any);
   } catch (error) {
     console.error('Erro ao registrar aprendizado:', error);
     throw error;

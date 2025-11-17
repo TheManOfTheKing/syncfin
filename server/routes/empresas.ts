@@ -102,14 +102,14 @@ router.post('/', async (req: AuthRequest, res) => {
       documento,
       slug: slug || nome.toLowerCase().replace(/\s+/g, '-'),
       status: 'ativa',
-    });
+    } as any);
 
     // Associar usuário à empresa como admin
     await db.insert(usuarioEmpresas).values({
       usuarioId: userId,
       empresaId: novaEmpresa.insertId,
       perfil: 'admin',
-    });
+    } as any);
 
     const [empresa] = await db
       .select()
@@ -213,7 +213,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     // Inativar empresa
     await db
       .update(empresas)
-      .set({ status: 'inativa', updatedAt: new Date() })
+      .set({ status: 'inativa', updatedAt: new Date() } as any)
       .where(eq(empresas.id, empresaId));
 
     res.json({ message: 'Empresa inativada com sucesso' });

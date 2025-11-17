@@ -55,7 +55,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       name,
       role: 'user',
-    });
+    } as any);
 
     // Gerar token
     const token = generateToken(newUser.insertId, email);
@@ -142,7 +142,8 @@ router.post('/login', async (req, res) => {
       error: 'Erro ao fazer login',
       message: error.message || 'Erro desconhecido',
       code: error.code,
-      detalhes: process.env.NODE_ENV === 'development' ? error.stack : 'Verifique os logs do servidor'
+      detalhes: process.env.NODE_ENV === 'development' ? error.stack : error.message,
+      database_configured: !!process.env.DATABASE_URL
     });
   }
 });

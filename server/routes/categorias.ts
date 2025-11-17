@@ -124,7 +124,7 @@ router.post('/', async (req: AuthRequest, res) => {
       codigo,
       descricao,
       ativo: true,
-    });
+    } as any);
 
     const [categoria] = await db
       .select()
@@ -233,7 +233,7 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     // Inativar categoria
     await db
       .update(categorias)
-      .set({ ativo: false, updatedAt: new Date() })
+      .set({ ativo: false, updatedAt: new Date() } as any)
       .where(eq(categorias.id, categoriaId));
 
     res.json({ message: 'Categoria inativada com sucesso' });

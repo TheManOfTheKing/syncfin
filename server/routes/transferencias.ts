@@ -72,7 +72,7 @@ router.post('/detectar', async (req: AuthRequest, res) => {
               status: 'transferencia_interna',
               grupoTransferenciaId: grupoId,
               updatedAt: new Date(),
-            })
+            } as any)
             .where(
               and(
                 eq(transacoes.empresaId, parseInt(empresaId)),
@@ -86,7 +86,7 @@ router.post('/detectar', async (req: AuthRequest, res) => {
               status: 'transferencia_interna',
               grupoTransferenciaId: grupoId,
               updatedAt: new Date(),
-            })
+            } as any)
             .where(
               and(
                 eq(transacoes.empresaId, parseInt(empresaId)),
