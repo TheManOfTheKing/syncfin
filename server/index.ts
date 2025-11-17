@@ -2,48 +2,75 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import empresasRoutes from './routes/empresas.js';
-import categoriasRoutes from './routes/categorias.js';
-import contasRoutes from './routes/contas.js';
-import transacoesRoutes from './routes/transacoes.js';
-import importacaoRoutes from './routes/importacao.js';
-import transferenciasRoutes from './routes/transferencias.js';
-import dashboardRoutes from './routes/dashboard.js';
-import relatoriosRoutes from './routes/relatorios.js';
 
-// Carregar variáveis de ambiente
+// Carregar variáveis de ambiente ANTES de tudo
 dotenv.config();
 
-console.log('🔄 Iniciando servidor...');
-console.log('📋 Variáveis de ambiente:');
-console.log(`   - NODE_ENV: ${process.env.NODE_ENV || 'não definido'}`);
-console.log(`   - PORT: ${process.env.PORT || 'não definido (usando 3000)'}`);
-console.log(`   - DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Configurado' : '❌ Não configurado'}`);
-console.log(`   - JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Configurado' : '⚠️ Não configurado'}`);
-console.log(`   - FRONTEND_URL: ${process.env.FRONTEND_URL || 'não definido (usando http://localhost:5173)'}`);
+// ============================================
+// LOGS DE INICIALIZAÇÃO
+// ============================================
+console.log('');
+console.log('='.repeat(60));
+console.log('🔄 INICIANDO SERVIDOR - ' + new Date().toISOString());
+console.log('='.repeat(60));
+console.log('');
+console.log('📋 Variáveis de Ambiente:');
+console.log(`   NODE_ENV: ${process.env.NODE_ENV || '❌ NÃO DEFINIDO'}`);
+console.log(`   PORT: ${process.env.PORT || '❌ NÃO DEFINIDO (usando 3000)'}`);
+console.log(`   DATABASE_URL: ${process.env.DATABASE_URL ? '✅ Configurado (' + process.env.DATABASE_URL.substring(0, 30) + '...)' : '❌ NÃO CONFIGURADO'}`);
+console.log(`   JWT_SECRET: ${process.env.JWT_SECRET ? '✅ Configurado' : '❌ NÃO CONFIGURADO'}`);
+console.log(`   FRONTEND_URL: ${process.env.FRONTEND_URL || '❌ NÃO DEFINIDO'}`);
+console.log('');
 
-// Verificar variáveis de ambiente essenciais
-if (!process.env.DATABASE_URL) {
-  console.error('❌ ERRO CRÍTICO: DATABASE_URL não encontrada!');
-  console.error('📝 Configure a variável DATABASE_URL no Railway.');
-  console.error('⚠️ O servidor será iniciado, mas as rotas de API não funcionarão.');
+// ============================================
+// IMPORTAR ROTAS (com try/catch)
+// ============================================
+let authRoutes: any;
+let empresasRoutes: any;
+let categoriasRoutes: any;
+let contasRoutes: any;
+let transacoesRoutes: any;
+let importacaoRoutes: any;
+let transferenciasRoutes: any;
+let dashboardRoutes: any;
+let relatoriosRoutes: any;
+
+try {
+  console.log('📦 Importando rotas...');
+  authRoutes = (await import('./routes/auth.js')).default;
+  empresasRoutes = (await import('./routes/empresas.js')).default;
+  categoriasRoutes = (await import('./routes/categorias.js')).default;
+  contasRoutes = (await import('./routes/contas.js')).default;
+  transacoesRoutes = (await import('./routes/transacoes.js')).default;
+  importacaoRoutes = (await import('./routes/importacao.js')).default;
+  transferenciasRoutes = (await import('./routes/transferencias.js')).default;
+  dashboardRoutes = (await import('./routes/dashboard.js')).default;
+  relatoriosRoutes = (await import('./routes/relatorios.js')).default;
+  console.log('✅ Todas as rotas importadas com sucesso!');
+} catch (error: any) {
+  console.error('❌ ERRO ao importar rotas:', error.message);
+  console.error('Stack:', error.stack);
+  console.log('⚠️ Servidor continuará sem algumas rotas...');
 }
 
-if (!process.env.JWT_SECRET) {
-  console.error('⚠️ AVISO: JWT_SECRET não encontrada! Usando valor padrão (NÃO RECOMENDADO EM PRODUÇÃO)');
-}
+console.log('');
 
+// ============================================
+// CONFIGURAÇÃO DO EXPRESS
+// ============================================
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-console.log('🔧 Configuração do servidor:');
-console.log(`   - Ambiente: ${process.env.NODE_ENV || 'development'}`);
-console.log(`   - Porta: ${PORT}`);
-console.log(`   - Frontend permitido: ${FRONTEND_URL}`);
+console.log('🔧 Configurando Express...');
 
-// Middlewares
+// Middlewares básicos
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
+// CORS - permitir frontend
+console.log(`🌐 Configurando CORS para: ${FRONTEND_URL}`);
 app.use(cors({
   origin: FRONTEND_URL,
   credentials: true,
@@ -52,20 +79,20 @@ app.use(cors({
   exposedHeaders: ['Set-Cookie'],
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
+// Log de requisições
+app.use((req, _res, next) => {
+  console.log(`📥 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
-// Log de requisições em desenvolvimento
-if (process.env.NODE_ENV === 'development') {
-  app.use((req, _res, next) => {
-    console.log(`📥 ${req.method} ${req.path}`);
-    next();
-  });
-}
+console.log('✅ Express configurado!');
+console.log('');
 
-// Health check (importante para Railway)
-// Este endpoint DEVE responder mesmo se o banco estiver offline
+// ============================================
+// ROTAS ESSENCIAIS (sempre disponíveis)
+// ============================================
+
+// Health check - SEMPRE RESPONDE
 app.get('/health', (_req, res) => {
   const health = {
     status: 'ok',
@@ -74,90 +101,155 @@ app.get('/health', (_req, res) => {
     port: PORT,
     database: !!process.env.DATABASE_URL,
     uptime: process.uptime(),
+    memory: process.memoryUsage(),
   };
   
-  console.log('✅ Healthcheck acessado:', health);
+  console.log('✅ Healthcheck OK');
   res.status(200).json(health);
 });
 
-// Rota raiz para debug
+// Rota raiz
 app.get('/', (_req, res) => {
   res.json({
-    message: 'API de Conciliação Bancária',
+    message: 'API de Conciliação Bancária - FinSync',
     version: '1.0.0',
+    status: 'online',
     endpoints: {
       health: '/health',
-      api: '/api/*'
-    }
+      api: '/api/*',
+    },
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Rotas da API (todas com prefixo /api)
-app.use('/api/auth', authRoutes);
-app.use('/api/empresas', empresasRoutes);
-app.use('/api/categorias', categoriasRoutes);
-app.use('/api/contas', contasRoutes);
-app.use('/api/transacoes', transacoesRoutes);
-app.use('/api/importacao', importacaoRoutes);
-app.use('/api/transferencias', transferenciasRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/relatorios', relatoriosRoutes);
+// ============================================
+// REGISTRAR ROTAS DA API
+// ============================================
+console.log('🔗 Registrando rotas da API...');
+
+if (authRoutes) {
+  app.use('/api/auth', authRoutes);
+  console.log('   ✅ /api/auth');
+}
+
+if (empresasRoutes) {
+  app.use('/api/empresas', empresasRoutes);
+  console.log('   ✅ /api/empresas');
+}
+
+if (categoriasRoutes) {
+  app.use('/api/categorias', categoriasRoutes);
+  console.log('   ✅ /api/categorias');
+}
+
+if (contasRoutes) {
+  app.use('/api/contas', contasRoutes);
+  console.log('   ✅ /api/contas');
+}
+
+if (transacoesRoutes) {
+  app.use('/api/transacoes', transacoesRoutes);
+  console.log('   ✅ /api/transacoes');
+}
+
+if (importacaoRoutes) {
+  app.use('/api/importacao', importacaoRoutes);
+  console.log('   ✅ /api/importacao');
+}
+
+if (transferenciasRoutes) {
+  app.use('/api/transferencias', transferenciasRoutes);
+  console.log('   ✅ /api/transferencias');
+}
+
+if (dashboardRoutes) {
+  app.use('/api/dashboard', dashboardRoutes);
+  console.log('   ✅ /api/dashboard');
+}
+
+if (relatoriosRoutes) {
+  app.use('/api/relatorios', relatoriosRoutes);
+  console.log('   ✅ /api/relatorios');
+}
+
+console.log('');
 
 // Rota 404 para APIs não encontradas
 app.use('/api/*', (_req, res) => {
   res.status(404).json({ error: 'Rota não encontrada' });
 });
 
-// Middleware de tratamento de erros
+// ============================================
+// MIDDLEWARE DE ERRO
+// ============================================
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('❌ Erro no servidor:', err);
+  console.error('❌ Erro capturado:', err.message);
+  console.error('Stack:', err.stack);
   
-  // Não enviar stack trace em produção
   const errorResponse: any = {
     error: 'Erro interno do servidor',
-    message: err.message || 'Erro desconhecido'
+    message: err.message || 'Erro desconhecido',
   };
   
   if (process.env.NODE_ENV === 'development') {
     errorResponse.stack = err.stack;
-    errorResponse.code = err.code;
   }
   
   res.status(err.status || 500).json(errorResponse);
 });
 
-// Iniciar servidor
+// ============================================
+// INICIAR SERVIDOR
+// ============================================
+console.log('🚀 Iniciando servidor HTTP...');
+
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('');
-  console.log('🚀 ========================================');
-  console.log(`   ✅ Servidor rodando na porta ${PORT}`);
-  console.log(`   📍 Escutando em 0.0.0.0:${PORT}`);
-  console.log(`   🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   🔗 API: http://localhost:${PORT}/api`);
+  console.log('='.repeat(60));
+  console.log('🎉 SERVIDOR INICIADO COM SUCESSO!');
+  console.log('='.repeat(60));
+  console.log(`   📍 Porta: ${PORT}`);
+  console.log(`   🌍 Host: 0.0.0.0`);
+  console.log(`   🔗 URL: http://localhost:${PORT}`);
   console.log(`   ❤️ Health: http://localhost:${PORT}/health`);
-  console.log('🚀 ========================================');
+  console.log(`   🌐 API: http://localhost:${PORT}/api`);
+  console.log('='.repeat(60));
   console.log('');
-  console.log('✅ Servidor pronto para receber requisições!');
+  console.log('✅ Pronto para receber requisições!');
+  console.log('');
 });
 
-// Timeout para garantir que o servidor está escutando
+// Eventos do servidor
 server.on('listening', () => {
-  console.log('✅ Servidor está escutando na porta', PORT);
+  console.log(`✅ Servidor escutando na porta ${PORT}`);
 });
 
 server.on('error', (error: any) => {
-  console.error('❌ Erro ao iniciar servidor:', error);
+  console.error('');
+  console.error('='.repeat(60));
+  console.error('❌ ERRO AO INICIAR SERVIDOR');
+  console.error('='.repeat(60));
+  console.error('Erro:', error.message);
+  console.error('Código:', error.code);
+  
   if (error.code === 'EADDRINUSE') {
     console.error(`❌ Porta ${PORT} já está em uso!`);
   }
+  
+  console.error('='.repeat(60));
+  console.error('');
   process.exit(1);
 });
+
+// ============================================
+// TRATAMENTO DE SINAIS E ERROS
+// ============================================
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('⚠️ SIGTERM recebido, encerrando servidor...');
   server.close(() => {
-    console.log('✅ Servidor encerrado com sucesso');
+    console.log('✅ Servidor encerrado');
     process.exit(0);
   });
 });
@@ -165,17 +257,35 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
   console.log('⚠️ SIGINT recebido, encerrando servidor...');
   server.close(() => {
-    console.log('✅ Servidor encerrado com sucesso');
+    console.log('✅ Servidor encerrado');
     process.exit(0);
   });
 });
 
 // Capturar erros não tratados
 process.on('uncaughtException', (error) => {
-  console.error('❌ Exceção não capturada:', error);
-  process.exit(1);
+  console.error('');
+  console.error('='.repeat(60));
+  console.error('❌ EXCEÇÃO NÃO CAPTURADA');
+  console.error('='.repeat(60));
+  console.error('Erro:', error.message);
+  console.error('Stack:', error.stack);
+  console.error('='.repeat(60));
+  console.error('');
+  console.error('⚠️ O servidor continuará rodando, mas pode estar instável.');
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Promise rejeitada não tratada:', promise, 'razão:', reason);
+process.on('unhandledRejection', (reason: any, promise) => {
+  console.error('');
+  console.error('='.repeat(60));
+  console.error('❌ PROMISE REJEITADA NÃO TRATADA');
+  console.error('='.repeat(60));
+  console.error('Razão:', reason);
+  console.error('Promise:', promise);
+  console.error('='.repeat(60));
+  console.error('');
+  console.error('⚠️ O servidor continuará rodando, mas pode estar instável.');
 });
+
+console.log('✅ Handlers de erro configurados');
+console.log('');
