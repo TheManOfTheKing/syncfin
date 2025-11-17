@@ -94,6 +94,7 @@ export async function classificarAutomaticamente(
   descricaoLimpa: string
 ): Promise<ResultadoClassificacao> {
   try {
+    const db = await getDb();
     // Buscar histórico de aprendizado da empresa
     const historico = await db
       .select()
@@ -197,6 +198,7 @@ export async function detectarTransferenciasInternas(
   janelaTempoHoras: number = 60 // Configurável, padrão 60 horas (2.5 dias)
 ): Promise<Array<{ saida: number; entrada: number; confidence: number }>> {
   try {
+    const db = await getDb();
     // Buscar transações de saída e entrada no período
     const transacoesEmpresa = await db
       .select()
