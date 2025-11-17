@@ -6,28 +6,29 @@ import { eq } from 'drizzle-orm';
 
 const router = Router();
 
-// Endpoint de diagnóstico (apenas em desenvolvimento)
-if (process.env.NODE_ENV === 'development') {
-  router.get('/diagnostico', async (_req, res) => {
-    try {
-      // Testar conexão
-      await db.select().from(users).limit(1);
-      
-      res.json({
-        status: 'ok',
-        mensagem: 'Conexão com banco funcionando',
-        tabela_users: 'existe'
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        status: 'erro',
-        mensagem: error.message,
-        codigo: error.code,
-        stack: error.stack
-      });
-    }
-  });
-}
+// Endpoint de diagnóstico (disponível em todos os ambientes)
+router.get('/diagnostico', async (_req, res) => {
+  try {
+    // Testar conexão
+    await db.select().from(users).limit(1);
+    
+    res.json({
+      status: 'ok',
+      mensagem: 'Conexão com banco funcionando',
+      tabela_users: 'existe',
+      database_url: process.env.DATABASE_URL ? 'configurada' : 'não configurada'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'erro',
+      mensagem: error.message,
+      codigo: error.code,
+      erro_tipo: error.code === 'ER_NO_SUCH_TABLE' ? 'Tabela não existe - Execute migrações' : 'Erro de conexão',
+      database_url: process.env.DATABASE_URL ? 'configurada' : 'não configurada',
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
 
 // Registro de novo usuário
 router.post('/register', async (req, res) => {
@@ -116,27 +117,32 @@ router.post('/login', async (req, res) => {
   } catch (error: any) {
     console.error('❌ Erro no login:', error);
     console.error('Stack:', error.stack);
+    console.error('Código do erro:', error.code);
     
     // Verificar se é erro de conexão com banco
     if (error.code === 'ECONNREFUSED' || error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ER_ACCESS_DENIED_ERROR') {
       return res.status(503).json({ 
         error: 'Erro ao conectar com o banco de dados',
-        detalhes: 'Verifique se o MySQL está rodando e se a DATABASE_URL está correta'
+        detalhes: 'Verifique se o MySQL está rodando e se a DATABASE_URL está correta',
+        codigo: error.code
       });
     }
     
     // Verificar se é erro de tabela não encontrada
-    if (error.code === 'ER_NO_SUCH_TABLE' || error.message?.includes('doesn\'t exist')) {
+    if (error.code === 'ER_NO_SUCH_TABLE' || error.message?.includes('doesn\'t exist') || error.message?.includes('Table') && error.message?.includes('doesn\'t exist')) {
       return res.status(500).json({ 
         error: 'Tabela não encontrada no banco de dados',
-        detalhes: 'Execute: pnpm db:push para criar as tabelas'
+        detalhes: 'As tabelas não foram criadas. Execute as migrações do banco de dados.',
+        codigo: error.code,
+        mensagem: error.message
       });
     }
     
     res.status(500).json({ 
       error: 'Erro ao fazer login',
-      message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      code: process.env.NODE_ENV === 'development' ? error.code : undefined
+      message: error.message || 'Erro desconhecido',
+      code: error.code,
+      detalhes: process.env.NODE_ENV === 'development' ? error.stack : 'Verifique os logs do servidor'
     });
   }
 });

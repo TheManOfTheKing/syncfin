@@ -1,4 +1,4 @@
-import { mysqlTable, int, varchar, text, timestamp, mysqlEnum, boolean, index, unique, decimal } from 'drizzle-orm/mysql-core';
+import { mysqlTable, int, varchar, text, timestamp, datetime, mysqlEnum, boolean, index, unique, decimal } from 'drizzle-orm/mysql-core';
 
 /**
  * Tabela de usuários (autenticação local)
@@ -12,7 +12,10 @@ export const users = mysqlTable('users', {
   ativo: boolean('ativo').default(true).notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
-});
+}, (table) => ({
+  emailIdx: index('idx_email').on(table.email),
+  roleIdx: index('idx_role').on(table.role),
+}));
 
 /**
  * Tabela de empresas (multi-tenant)
@@ -25,7 +28,10 @@ export const empresas = mysqlTable('empresas', {
   status: mysqlEnum('status', ['ativa', 'inativa', 'suspensa']).default('ativa').notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
-});
+}, (table) => ({
+  documentoIdx: index('idx_documento').on(table.documento),
+  statusIdx: index('idx_status').on(table.status),
+}));
 
 /**
  * Relacionamento usuário-empresa (permissões)
@@ -36,7 +42,11 @@ export const usuarioEmpresas = mysqlTable('usuario_empresas', {
   empresaId: int('empresaId').notNull(),
   perfil: mysqlEnum('perfil', ['admin', 'usuario', 'visualizador']).default('usuario').notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
-});
+}, (table) => ({
+  usuarioEmpresaUnique: unique('unique_usuario_empresa').on(table.usuarioId, table.empresaId),
+  usuarioIdx: index('idx_usuario').on(table.usuarioId),
+  empresaIdx: index('idx_empresa').on(table.empresaId),
+}));
 
 /**
  * Contas bancárias por empresa
@@ -70,8 +80,9 @@ export const categorias = mysqlTable('categorias', {
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 }, (table) => ({
-  empresaIdx: index('empresaIdx').on(table.empresaId),
-  tipoIdx: index('tipoIdx').on(table.tipo),
+  empresaIdx: index('idx_empresa').on(table.empresaId),
+  tipoIdx: index('idx_tipo').on(table.tipo),
+  ativoIdx: index('idx_ativo').on(table.ativo),
 }));
 
 /**
@@ -81,8 +92,8 @@ export const transacoes = mysqlTable('transacoes', {
   id: int('id').autoincrement().primaryKey(),
   empresaId: int('empresaId').notNull(),
   contaId: int('contaId'),
-  dataOperacao: timestamp('dataOperacao').notNull(),
-  dataCompensacao: timestamp('dataCompensacao'),
+  dataOperacao: datetime('dataOperacao').notNull(),
+  dataCompensacao: datetime('dataCompensacao'),
   descricaoOriginal: text('descricaoOriginal').notNull(),
   descricaoLimpa: text('descricaoLimpa').notNull(),
   tipo: mysqlEnum('tipo', ['entrada', 'saida']).notNull(),
@@ -102,10 +113,11 @@ export const transacoes = mysqlTable('transacoes', {
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 }, (table) => ({
-  empresaHashIdx: unique('empresaHashIdx').on(table.empresaId, table.hashUnico),
-  empresaDataIdx: index('empresaDataIdx').on(table.empresaId, table.dataOperacao),
-  statusIdx: index('statusIdx').on(table.status),
-  contaIdx: index('contaIdx').on(table.contaId),
+  empresaHashIdx: unique('unique_empresa_hash').on(table.empresaId, table.hashUnico),
+  empresaDataIdx: index('idx_empresa_data').on(table.empresaId, table.dataOperacao),
+  statusIdx: index('idx_status').on(table.status),
+  contaIdx: index('idx_conta').on(table.contaId),
+  categoriaIdx: index('idx_categoria').on(table.categoriaId),
 }));
 
 /**
@@ -120,7 +132,8 @@ export const mapeamentosImportacao = mysqlTable('mapeamentos_importacao', {
   ativo: boolean('ativo').default(true).notNull(),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
 }, (table) => ({
-  empresaIdx: index('empresaIdx').on(table.empresaId),
+  empresaIdx: index('idx_empresa').on(table.empresaId),
+  ativoIdx: index('idx_ativo').on(table.ativo),
 }));
 
 /**
@@ -136,8 +149,8 @@ export const historicoAprendizado = mysqlTable('historico_aprendizado', {
   usuarioId: int('usuarioId'),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
 }, (table) => ({
-  empresaIdx: index('empresaIdx').on(table.empresaId),
-  categoriaIdx: index('categoriaIdx').on(table.categoriaId),
+  empresaIdx: index('idx_empresa').on(table.empresaId),
+  categoriaIdx: index('idx_categoria').on(table.categoriaId),
 }));
 
 /**
