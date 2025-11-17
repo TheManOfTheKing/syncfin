@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../config/api';
+import { buildApiUrl } from '../config/api';
 import Header from '../components/Header';
 
 export default function Empresas() {
@@ -21,7 +21,7 @@ export default function Empresas() {
   const carregarEmpresas = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/empresas`, {
+      const response = await fetch(`buildApiUrl('/api/empresas')`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ export default function Empresas() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/empresas`, {
+      const response = await fetch(`buildApiUrl('/api/empresas')`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

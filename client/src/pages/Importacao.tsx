@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../config/api';
+import { buildApiUrl } from '../config/api';
 import Header from '../components/Header';
 
 export default function Importacao() {
@@ -23,7 +23,7 @@ export default function Importacao() {
   const carregarEmpresas = async () => {
     try {
       const token = localStorage.getItem('token');
-        const response = await fetch(`${API_URL}/api/empresas`, {
+        const response = await fetch(`buildApiUrl('/api/empresas')`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
@@ -71,7 +71,7 @@ export default function Importacao() {
       formData.append('empresaId', empresaId);
       if (contaId) formData.append('contaId', contaId);
 
-      const response = await fetch(`${API_URL}/api/importacao/upload`, {
+      const response = await fetch(`buildApiUrl('/api/importacao/upload')`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -129,7 +129,7 @@ export default function Importacao() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/importacao/confirmar`, {
+      const response = await fetch(`buildApiUrl('/api/importacao/confirmar')`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

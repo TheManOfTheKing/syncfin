@@ -2,6 +2,13 @@
 // Em desenvolvimento: usa proxy do Vite (localhost:3000)
 // Em produção: usa variável de ambiente VITE_API_URL (Railway URL)
 
+// Função para normalizar URL (remover barra final se existir)
+const normalizeUrl = (url: string): string => {
+  if (!url) return '';
+  // Remove barra final para evitar duplicação
+  return url.replace(/\/+$/, '');
+};
+
 const getApiUrl = () => {
   // Se estiver em desenvolvimento, usa string vazia (proxy do Vite)
   if (import.meta.env.DEV) {
@@ -15,16 +22,37 @@ const getApiUrl = () => {
     console.error('❌ ERRO: VITE_API_URL não configurada!');
     console.error('Configure a variável de ambiente VITE_API_URL na Vercel com a URL do Railway');
     console.error('Exemplo: https://seu-backend.up.railway.app');
+    return '';
   }
   
-  return apiUrl || '';
+  // Normalizar URL (remover barra final)
+  return normalizeUrl(apiUrl);
 };
 
 export const API_URL = getApiUrl();
 
+// Helper para construir URL completa do endpoint
+export const buildApiUrl = (endpoint: string): string => {
+  // Se o endpoint já é uma URL completa, retorna como está
+  if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+    return endpoint;
+  }
+  
+  // Garantir que o endpoint comece com /
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  // Se não tem API_URL (desenvolvimento), retorna endpoint relativo
+  if (!API_URL) {
+    return normalizedEndpoint;
+  }
+  
+  // Combinar API_URL (sem barra final) + endpoint (com barra inicial)
+  return `${API_URL}${normalizedEndpoint}`;
+};
+
 // Helper para fazer requisições com a URL correta
 export const apiFetch = async (endpoint: string, options?: RequestInit) => {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
+  const url = buildApiUrl(endpoint);
   
   // Log apenas em desenvolvimento
   if (import.meta.env.DEV) {
