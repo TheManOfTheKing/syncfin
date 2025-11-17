@@ -33,7 +33,7 @@ O Railway é **perfeito** para backends Node.js/Express porque:
 2. Faça login com GitHub
 3. Clique em **"New Project"**
 4. Selecione **"Deploy from GitHub repo"**
-5. Escolha o repositório: `salesadvarquivo/syncfin`
+5. Escolha o repositório: `TheManOfTheKing/syncfin`
 6. Railway detecta automaticamente o `package.json`
 
 ### 2. Configurar Variáveis de Ambiente
