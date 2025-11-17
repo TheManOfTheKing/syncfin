@@ -81,8 +81,8 @@ router.post('/detectar', async (req: AuthRequest, res) => {
               )
             );
 
-          const dbInstance2 = await getDb();
-          await dbInstance2.update(transacoes)
+          const dbInstance3 = await getDb();
+          await dbInstance3.update(transacoes)
             .set({
               status: 'transferencia_interna',
               grupoTransferenciaId: grupoId,
