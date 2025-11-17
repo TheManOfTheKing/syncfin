@@ -60,22 +60,69 @@ console.log('');
 // ============================================
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Função para normalizar URL (garantir que tenha protocolo)
+function normalizeUrl(url: string): string {
+  if (!url) return 'http://localhost:5173';
+  // Se já tem protocolo, retorna como está
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Se não tem protocolo, adiciona https://
+  return `https://${url}`;
+}
+
+// Obter e normalizar FRONTEND_URL
+const FRONTEND_URL_RAW = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = normalizeUrl(FRONTEND_URL_RAW);
+
+// Lista de origens permitidas (desenvolvimento e produção)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  FRONTEND_URL,
+  'https://syncfin.vercel.app',
+  'https://syncfin-front.vercel.app',
+].filter((url, index, self) => self.indexOf(url) === index); // Remove duplicatas
 
 console.log('🔧 Configurando Express...');
+console.log(`🌐 FRONTEND_URL (raw): ${FRONTEND_URL_RAW}`);
+console.log(`🌐 FRONTEND_URL (normalized): ${FRONTEND_URL}`);
+console.log(`🌐 Origens permitidas: ${allowedOrigins.join(', ')}`);
 
 // Middlewares básicos
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// CORS - permitir frontend
-console.log(`🌐 Configurando CORS para: ${FRONTEND_URL}`);
+// CORS - permitir frontend com validação dinâmica
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    // Permitir requisições sem origin (ex: Postman, curl)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Verificar se a origin está na lista de permitidas
+    if (allowedOrigins.some(allowed => origin === allowed || origin.startsWith(allowed))) {
+      console.log(`✅ CORS permitido para: ${origin}`);
+      return callback(null, true);
+    }
+    
+    // Se não estiver na lista, verificar se é uma variação válida
+    const normalizedOrigin = normalizeUrl(origin.replace(/^https?:\/\//, ''));
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      console.log(`✅ CORS permitido para (normalizado): ${origin} -> ${normalizedOrigin}`);
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS bloqueado para: ${origin}`);
+    console.log(`   Origens permitidas: ${allowedOrigins.join(', ')}`);
+    callback(new Error('Não permitido por CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
   exposedHeaders: ['Set-Cookie'],
 }));
 
