@@ -36,19 +36,23 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/relatorios', relatoriosRoutes);
 
 // Health check
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response): void => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Middleware de tratamento de erros
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
   console.error('❌ Erro no servidor:', err);
-  res.status(500).json({ 
-    error: 'Erro interno do servidor',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+  if (!res.headersSent) {
+    const error = err as { message?: string };
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
 // Exportar como serverless function para Vercel
+// A Vercel automaticamente detecta e usa o app Express
 export default app;
-
