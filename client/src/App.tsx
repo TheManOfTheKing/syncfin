@@ -9,6 +9,7 @@ import Importacao from './pages/Importacao';
 import Transacoes from './pages/Transacoes';
 import Relatorios from './pages/Relatorios';
 import Documentacao from './pages/Documentacao';
+import Conciliacao from './pages/Conciliacao';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,6 +129,16 @@ function App() {
           element={
             isAuthenticated ? (
               <Documentacao />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/conciliacao"
+          element={
+            isAuthenticated ? (
+              <Conciliacao />
             ) : (
               <Navigate to="/login" replace />
             )

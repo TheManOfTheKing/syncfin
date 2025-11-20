@@ -210,7 +210,7 @@ export default function Dashboard({ onLogout }: DashboardProps) {
             <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
               Comece cadastrando suas empresas e contas bancárias.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <button 
                 onClick={() => navigate('/empresas')}
                 className="group relative px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-blue-500/50 hover:scale-105 flex items-center justify-center gap-2"
@@ -237,6 +237,24 @@ export default function Dashboard({ onLogout }: DashboardProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 Importar Extrato
+              </button>
+              <button 
+                onClick={() => navigate('/conciliacao?aba=importar')}
+                className="group relative px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-indigo-500/50 hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Importar Lançamentos
+              </button>
+              <button 
+                onClick={() => navigate('/conciliacao?aba=executar')}
+                className="group relative px-6 py-4 bg-gradient-to-r from-violet-600 to-violet-700 text-white rounded-xl font-medium transition-all duration-300 shadow-lg hover:shadow-violet-500/50 hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                Conciliação Bancária
               </button>
               <button 
                 onClick={() => navigate('/transacoes')}
