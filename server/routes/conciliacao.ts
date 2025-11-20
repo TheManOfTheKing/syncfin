@@ -1,5 +1,6 @@
 /**
  * Rotas da API para o módulo de conciliação bancária
+ * VERSÃO CORRIGIDA - Resolve erros de build TypeScript
  */
 
 import { Router, Request, Response } from 'express';
@@ -51,7 +52,8 @@ router.post('/lancamentos/importar', upload.single('arquivo'), async (req: Reque
     const lancamentosInseridos = [];
 
     for (const lanc of resultado.lancamentos) {
-      const [inserted] = await db.insert(lancamentosContabeis).values({
+      // ✅ CORREÇÃO: Remover array destructuring
+      const inserted = await db.insert(lancamentosContabeis).values({
         empresaId: parseInt(empresaId),
         contaId: contaId ? parseInt(contaId) : null,
         tipo: lanc.tipo,
@@ -146,14 +148,18 @@ router.post('/executar', async (req: Request, res: Response) => {
 
     const db = await getDb();
 
-    // Criar lote de conciliação
-    const [lote] = await db.insert(lotesConciliacao).values({
+    // ✅ CORREÇÃO: Criar lote com todos os campos necessários
+    const lote = await db.insert(lotesConciliacao).values({
       empresaId: parseInt(empresaId),
       descricao: `Conciliação ${dataInicio} a ${dataFim}`,
       dataInicio: new Date(dataInicio),
       dataFim: new Date(dataFim),
       status: 'processando',
       usuarioId: usuarioId ? parseInt(usuarioId) : 1,
+      totalTransacoes: 0,
+      totalLancamentos: 0,
+      totalConciliados: 0,
+      totalDivergencias: 0,
     });
 
     const loteId = lote.insertId;
