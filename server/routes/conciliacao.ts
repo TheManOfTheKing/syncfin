@@ -52,25 +52,24 @@ router.post('/lancamentos/importar', upload.single('arquivo'), async (req: Reque
     const lancamentosInseridos = [];
 
     for (const lanc of resultado.lancamentos) {
-      // ✅ CORREÇÃO: Remover array destructuring
-      const inserted = await db.insert(lancamentosContabeis).values({
+      const [inserted] = await db.insert(lancamentosContabeis).values({
         empresaId: parseInt(empresaId),
-        contaId: contaId ? parseInt(contaId) : null,
+        contaId: contaId ? parseInt(contaId) : undefined,
         tipo: lanc.tipo,
         dataVencimento: lanc.dataVencimento,
-        dataEmissao: lanc.dataEmissao,
-        dataPagamento: lanc.dataPagamento,
+        dataEmissao: lanc.dataEmissao || undefined,
+        dataPagamento: lanc.dataPagamento || undefined,
         descricao: lanc.descricao,
-        numeroDocumento: lanc.numeroDocumento,
-        nossoNumero: lanc.nossoNumero,
-        codigoBarras: lanc.codigoBarras,
-        fornecedorCliente: lanc.fornecedorCliente,
-        documentoFornecedorCliente: lanc.documentoFornecedorCliente,
+        numeroDocumento: lanc.numeroDocumento || undefined,
+        nossoNumero: lanc.nossoNumero || undefined,
+        codigoBarras: lanc.codigoBarras || undefined,
+        fornecedorCliente: lanc.fornecedorCliente || undefined,
+        documentoFornecedorCliente: lanc.documentoFornecedorCliente || undefined,
         valor: lanc.valor.toString(),
-        valorPago: lanc.valorPago ? lanc.valorPago.toString() : null,
+        valorPago: lanc.valorPago ? lanc.valorPago.toString() : undefined,
         status: 'aberto',
-        origem: resultado.formato,
-        dadosOriginais: lanc.dadosOriginais ? JSON.stringify(lanc.dadosOriginais) : null,
+        origem: resultado.formato || undefined,
+        dadosOriginais: lanc.dadosOriginais ? JSON.stringify(lanc.dadosOriginais) : undefined,
       });
 
       lancamentosInseridos.push(inserted);
@@ -148,8 +147,8 @@ router.post('/executar', async (req: Request, res: Response) => {
 
     const db = await getDb();
 
-    // ✅ CORREÇÃO: Criar lote com todos os campos necessários
-    const lote = await db.insert(lotesConciliacao).values({
+    // Criar lote de conciliação
+    const [lote] = await db.insert(lotesConciliacao).values({
       empresaId: parseInt(empresaId),
       descricao: `Conciliação ${dataInicio} a ${dataFim}`,
       dataInicio: new Date(dataInicio),
@@ -394,7 +393,7 @@ router.post('/aprovar/:id', async (req: Request, res: Response) => {
     await db.update(conciliacoes)
       .set({
         status: 'aprovada',
-        usuarioId: usuarioId ? parseInt(usuarioId) : null,
+        usuarioId: usuarioId ? parseInt(usuarioId) : undefined,
       })
       .where(eq(conciliacoes.id, parseInt(id)));
 
@@ -432,7 +431,7 @@ router.post('/rejeitar/:id', async (req: Request, res: Response) => {
     await db.update(conciliacoes)
       .set({
         status: 'rejeitada',
-        usuarioId: usuarioId ? parseInt(usuarioId) : null,
+        usuarioId: usuarioId ? parseInt(usuarioId) : undefined,
         observacoes: motivo,
       })
       .where(eq(conciliacoes.id, parseInt(id)));
