@@ -34,6 +34,7 @@ let importacaoRoutes: any;
 let transferenciasRoutes: any;
 let dashboardRoutes: any;
 let relatoriosRoutes: any;
+let conciliacaoRoutes: any;
 
 try {
   console.log('📦 Importando rotas...');
@@ -46,6 +47,7 @@ try {
   transferenciasRoutes = (await import('./routes/transferencias.js')).default;
   dashboardRoutes = (await import('./routes/dashboard.js')).default;
   relatoriosRoutes = (await import('./routes/relatorios.js')).default;
+  conciliacaoRoutes = (await import('./routes/conciliacao.js')).default;
   console.log('✅ Todas as rotas importadas com sucesso!');
 } catch (error: any) {
   console.error('❌ ERRO ao importar rotas:', error.message);
@@ -217,6 +219,11 @@ if (dashboardRoutes) {
 if (relatoriosRoutes) {
   app.use('/api/relatorios', relatoriosRoutes);
   console.log('   ✅ /api/relatorios');
+}
+
+if (conciliacaoRoutes) {
+  app.use('/api/conciliacao', conciliacaoRoutes);
+  console.log('   ✅ /api/conciliacao');
 }
 
 console.log('');

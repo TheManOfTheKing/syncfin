@@ -196,3 +196,155 @@ export type InsertHistoricoAprendizado = typeof historicoAprendizado.$inferInser
 
 export type ConfiguracaoWhiteLabel = typeof configuracoesWhiteLabel.$inferSelect;
 export type InsertConfiguracaoWhiteLabel = typeof configuracoesWhiteLabel.$inferInsert;
+
+/**
+ * ============================================================================
+ * MÓDULO DE CONCILIAÇÃO BANCÁRIA COMPLETA
+ * ============================================================================
+ */
+
+/**
+ * Lançamentos contábeis importados do ERP (contas a pagar/receber)
+ */
+export const lancamentosContabeis = mysqlTable('lancamentos_contabeis', {
+  id: int('id').autoincrement().primaryKey(),
+  empresaId: int('empresaId').notNull(),
+  contaId: int('contaId'),
+  tipo: mysqlEnum('tipo', ['pagar', 'receber']).notNull(),
+  dataVencimento: datetime('dataVencimento').notNull(),
+  dataEmissao: datetime('dataEmissao'),
+  dataPagamento: datetime('dataPagamento'),
+  descricao: text('descricao').notNull(),
+  numeroDocumento: varchar('numeroDocumento', { length: 120 }),
+  nossoNumero: varchar('nossoNumero', { length: 120 }),
+  codigoBarras: varchar('codigoBarras', { length: 120 }),
+  fornecedorCliente: varchar('fornecedorCliente', { length: 180 }),
+  documentoFornecedorCliente: varchar('documentoFornecedorCliente', { length: 32 }),
+  valor: decimal('valor', { precision: 15, scale: 2 }).notNull(),
+  valorPago: decimal('valorPago', { precision: 15, scale: 2 }),
+  status: mysqlEnum('status', [
+    'aberto',
+    'parcialmente_conciliado',
+    'conciliado',
+    'cancelado'
+  ]).default('aberto').notNull(),
+  categoriaId: int('categoriaId'),
+  origem: varchar('origem', { length: 32 }).default('importacao'),
+  dadosOriginais: text('dadosOriginais'), // JSON com dados completos do arquivo original
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+}, (table) => ({
+  empresaIdx: index('idx_lanc_empresa').on(table.empresaId),
+  statusIdx: index('idx_lanc_status').on(table.status),
+  tipoIdx: index('idx_lanc_tipo').on(table.tipo),
+  vencimentoIdx: index('idx_lanc_vencimento').on(table.dataVencimento),
+  nossoNumeroIdx: index('idx_lanc_nosso_numero').on(table.nossoNumero),
+  codigoBarrasIdx: index('idx_lanc_codigo_barras').on(table.codigoBarras),
+}));
+
+/**
+ * Registros de conciliação entre transações bancárias e lançamentos contábeis
+ */
+export const conciliacoes = mysqlTable('conciliacoes', {
+  id: int('id').autoincrement().primaryKey(),
+  empresaId: int('empresaId').notNull(),
+  transacaoId: int('transacaoId').notNull(),
+  lancamentoId: int('lancamentoId').notNull(),
+  loteId: int('loteId'),
+  valorConciliado: decimal('valorConciliado', { precision: 15, scale: 2 }).notNull(),
+  tipo: mysqlEnum('tipo', ['automatica', 'manual', 'sugerida']).notNull(),
+  confidence: int('confidence').notNull(), // 0-100
+  status: mysqlEnum('status', [
+    'pendente',
+    'aprovada',
+    'rejeitada'
+  ]).default('pendente').notNull(),
+  observacoes: text('observacoes'),
+  usuarioId: int('usuarioId'), // Quem aprovou/rejeitou
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+}, (table) => ({
+  empresaIdx: index('idx_conc_empresa').on(table.empresaId),
+  transacaoIdx: index('idx_conc_transacao').on(table.transacaoId),
+  lancamentoIdx: index('idx_conc_lancamento').on(table.lancamentoId),
+  loteIdx: index('idx_conc_lote').on(table.loteId),
+  statusIdx: index('idx_conc_status').on(table.status),
+  tipoIdx: index('idx_conc_tipo').on(table.tipo),
+}));
+
+/**
+ * Divergências identificadas no processo de conciliação
+ */
+export const divergencias = mysqlTable('divergencias', {
+  id: int('id').autoincrement().primaryKey(),
+  empresaId: int('empresaId').notNull(),
+  loteId: int('loteId'),
+  tipo: mysqlEnum('tipo', [
+    'valor_diferente',
+    'data_diferente',
+    'nao_encontrado_banco',
+    'nao_encontrado_erp',
+    'duplicado',
+    'outro'
+  ]).notNull(),
+  transacaoId: int('transacaoId'),
+  lancamentoId: int('lancamentoId'),
+  descricao: text('descricao').notNull(),
+  valorEsperado: decimal('valorEsperado', { precision: 15, scale: 2 }),
+  valorEncontrado: decimal('valorEncontrado', { precision: 15, scale: 2 }),
+  status: mysqlEnum('status', [
+    'pendente',
+    'resolvida',
+    'ignorada'
+  ]).default('pendente').notNull(),
+  resolucao: text('resolucao'),
+  usuarioId: int('usuarioId'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+}, (table) => ({
+  empresaIdx: index('idx_div_empresa').on(table.empresaId),
+  loteIdx: index('idx_div_lote').on(table.loteId),
+  tipoIdx: index('idx_div_tipo').on(table.tipo),
+  statusIdx: index('idx_div_status').on(table.status),
+}));
+
+/**
+ * Lotes de conciliação para agrupar processamentos
+ */
+export const lotesConciliacao = mysqlTable('lotes_conciliacao', {
+  id: int('id').autoincrement().primaryKey(),
+  empresaId: int('empresaId').notNull(),
+  descricao: varchar('descricao', { length: 255 }),
+  dataInicio: datetime('dataInicio').notNull(),
+  dataFim: datetime('dataFim').notNull(),
+  totalTransacoes: int('totalTransacoes').default(0),
+  totalLancamentos: int('totalLancamentos').default(0),
+  totalConciliados: int('totalConciliados').default(0),
+  totalDivergencias: int('totalDivergencias').default(0),
+  taxaConciliacao: decimal('taxaConciliacao', { precision: 5, scale: 2 }),
+  status: mysqlEnum('status', [
+    'processando',
+    'concluido',
+    'erro'
+  ]).default('processando').notNull(),
+  usuarioId: int('usuarioId').notNull(),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+}, (table) => ({
+  empresaIdx: index('idx_lote_empresa').on(table.empresaId),
+  statusIdx: index('idx_lote_status').on(table.status),
+  dataInicioIdx: index('idx_lote_data_inicio').on(table.dataInicio),
+}));
+
+// Tipos inferidos para as novas tabelas
+export type LancamentoContabil = typeof lancamentosContabeis.$inferSelect;
+export type InsertLancamentoContabil = typeof lancamentosContabeis.$inferInsert;
+
+export type Conciliacao = typeof conciliacoes.$inferSelect;
+export type InsertConciliacao = typeof conciliacoes.$inferInsert;
+
+export type Divergencia = typeof divergencias.$inferSelect;
+export type InsertDivergencia = typeof divergencias.$inferInsert;
+
+export type LoteConciliacao = typeof lotesConciliacao.$inferSelect;
+export type InsertLoteConciliacao = typeof lotesConciliacao.$inferInsert;
