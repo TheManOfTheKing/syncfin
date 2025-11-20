@@ -32,7 +32,7 @@ router.get('/exportar/:loteId', async (req: Request, res: Response) => {
     const { loteId } = req.params;
     const { formato = 'csv' } = req.query;
 
-    const db = getDb();
+    const db = await getDb();
 
     // Buscar lote
     const [lote] = await db

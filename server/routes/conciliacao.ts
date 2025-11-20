@@ -47,7 +47,7 @@ router.post('/lancamentos/importar', upload.single('arquivo'), async (req: Reque
     }
 
     // Salvar lançamentos no banco
-    const db = getDb();
+    const db = await getDb();
     const lancamentosInseridos = [];
 
     for (const lanc of resultado.lancamentos) {
@@ -99,7 +99,7 @@ router.get('/lancamentos', async (req: Request, res: Response) => {
       return res.status(400).json({ erro: 'empresaId é obrigatório' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const conditions = [eq(lancamentosContabeis.empresaId, parseInt(empresaId as string))];
 
     if (status) {
@@ -144,7 +144,7 @@ router.post('/executar', async (req: Request, res: Response) => {
       return res.status(400).json({ erro: 'empresaId, dataInicio e dataFim são obrigatórios' });
     }
 
-    const db = getDb();
+    const db = await getDb();
 
     // Criar lote de conciliação
     const [lote] = await db.insert(lotesConciliacao).values({
@@ -319,7 +319,7 @@ router.get('/lotes', async (req: Request, res: Response) => {
       return res.status(400).json({ erro: 'empresaId é obrigatório' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const lotes = await db
       .select()
       .from(lotesConciliacao)
@@ -341,7 +341,7 @@ router.get('/lotes', async (req: Request, res: Response) => {
 router.get('/lotes/:id/detalhes', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const db = getDb();
+    const db = await getDb();
 
     const [lote] = await db
       .select()
@@ -383,7 +383,7 @@ router.post('/aprovar/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { usuarioId } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
 
     await db.update(conciliacoes)
       .set({
@@ -421,7 +421,7 @@ router.post('/rejeitar/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { usuarioId, motivo } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
 
     await db.update(conciliacoes)
       .set({
